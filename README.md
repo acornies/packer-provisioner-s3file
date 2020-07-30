@@ -2,6 +2,10 @@
 
 A simple HashiCorp [Packer](https://packer.io) provisioner, utilizing [github.com/hashicorp/go-getter](https://github.com/hashicorp/go-getter) to download files from Amazon S3 or S3 compatible endpoints.
 
+## Installation
+
+Please refer to the [official docs](https://www.packer.io/docs/extending/plugins) on plugin installation.
+
 ## Usage
 
 Using `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` environment variables:
@@ -42,4 +46,4 @@ Using inline S3 credentials and user-defined input variables:
 
 ## Community
 
-This provisioner is in response to @SwampDragons from [GitHub issue](https://github.com/hashicorp/packer/issues/7660). The implementation favours go-getter terminology and simply working with a provided URL for the S3 source.
+This provisioner is in response to @SwampDragons from this [GitHub issue](https://github.com/hashicorp/packer/issues/7660). The implementation favours go-getter terminology and simply working with a provided URL for the S3 source.
