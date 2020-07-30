@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/acornies/packer-provisioner-getter/s3file"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
@@ -10,6 +9,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterProvisioner(new(s3file.Provisioner))
+	server.RegisterProvisioner(new(Provisioner))
 	server.Serve()
 }
