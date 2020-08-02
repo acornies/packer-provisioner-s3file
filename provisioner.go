@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 
 	getter "github.com/hashicorp/go-getter"
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -89,17 +91,75 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		u.Query().Add("secret_key", p.config.S3SecretKey)
 	}
 
+	local := getTempLocation(p.config.Destination)
+
 	// Download
-	err := s3.GetFile(p.config.Destination, u)
+	err := s3.GetFile(local, u)
 	ui.Say(fmt.Sprintf("Downloading %s => %s", p.config.URL, p.config.Destination))
 	if err != nil {
 		return err
 	}
 
+	return p.ProvisionUpload(ui, comm)
+}
+
+func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
+
+	local := getTempLocation(p.config.Destination)
+
+	src, err := interpolate.Render(local, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Error interpolating source: %s", err)
+	}
+
+	dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Error interpolating destination: %s", err)
+	}
+
+	ui.Say(fmt.Sprintf("Uploading %s => %s", src, dst))
+
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	pf := ui.TrackProgress(filepath.Base(src), 0, info.Size(), f)
+	defer pf.Close()
+
+	// Upload the file
+	if err = comm.Upload(dst, pf, &fi); err != nil {
+		ui.Error(fmt.Sprintf("Upload failed: %s", err))
+		return err
+	}
+
+	// Remove local file
+	err = os.Remove(local)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Clean up failed: %s", err))
+		return err
+	}
 	return nil
 }
 
 func getURL(s string) (*url.URL, error) {
 	u, err := url.Parse(s)
 	return u, err
+}
+
+func getTempLocation(s string) string {
+	split := strings.Split(s, "/")
+	last := split[len(split)-1]
+	return fmt.Sprintf("./%s", last)
 }
