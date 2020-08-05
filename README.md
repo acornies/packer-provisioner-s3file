@@ -17,7 +17,7 @@ Using `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` environment variables:
     {
       "type": "s3file",
       "url": "https://s3-region.amazonaws.com/bucket/path/key",
-      "destination": "./example"
+      "destination": "/tmp/example"
     }
   ]
 }
@@ -38,7 +38,7 @@ Using inline S3 credentials and user-defined input variables:
       "url": "https://s3-region.amazonaws.com/bucket/path/key",
       "s3_access_key": "{{user `aws_access_key`}}",
       "s3_secret_key": "{{user `aws_secret_key`}}",
-      "destination": "./example"
+      "destination": "/tmp/example"
     }
   ]
 }
@@ -46,4 +46,4 @@ Using inline S3 credentials and user-defined input variables:
 
 ## Community
 
-This provisioner is in response to @SwampDragons from this [GitHub issue](https://github.com/hashicorp/packer/issues/7660). The implementation favours go-getter terminology and simply working with a provided URL for the S3 source.
+This provisioner is in response to @SwampDragons from this [GitHub issue](https://github.com/hashicorp/packer/issues/7660).
